@@ -1,0 +1,7 @@
+# FarmConnect Backend REST API
+
+Zero external dependencies required (runs directly on Python 3.8+ standard library).
+
+# Optional packages for development / testing:
+requests>=2.31.0
+pytest>=8.0.0

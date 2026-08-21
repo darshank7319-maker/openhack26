@@ -1,50 +1,98 @@
 # FarmConnect – Direct Market Access for Farmers 🌾
 
-> **FarmConnect** is a responsive, farmer-friendly agricultural marketplace web and mobile application designed to connect Indian farmers directly with retail consumers and buyers, eliminating unnecessary middlemen markups and providing real-time APMC Mandi market intelligence.
+> **FarmConnect** is a practical agricultural marketplace system connecting farmers directly with buyers to eliminate middlemen, provide fair prices, and deliver real-time APMC Mandi market intelligence.
 
 ---
 
-## 🌟 Core Features
+## 📁 Repository Architecture (Frontend & Backend Separation)
 
-- **🔐 Dual-Role Authentication & Demo Accounts**: Quick 1-click login for Farmer (`farmer@farmconnect.com`) and Buyer (`buyer@farmconnect.com`) + seamless role switching.
-- **🌾 Farmer Dashboard**: Verified Kisan badge, 4 live KPI cards (Active Crops, Pending Orders, Sales Revenue, Available Earnings), quick tools, Mandi ticker, and recent orders.
-- **➕ Add Crop Listing Form**: 12 produce photo presets, multi-unit support (`kg`, `quintal`, `crate`, `ton`, `dozen`, `liter`), organic certification tags, and instant publishing.
-- **🛒 Direct Marketplace**: Instant search, category filters, organic-only filter, price/rating sorting, freshness badges, and Add to Cart / Buy Now.
-- **🔍 Detailed Crop View**: High-res gallery, farm gate price, stock counter, farmer profile card, harvest date, shelf-life, and direct "Chat with Farmer".
-- **🛍️ Shopping Cart & Coupons**: Persistent cart with quantity incrementer, free delivery above ₹500, and promo coupons (`KISANFIRST`, `FRESH10`, `ORGANIC50`).
-- **💳 Multi-Method Checkout**: Delivery address with GPS auto-fill, Express 24h vs Standard 48h slot, and payment options (UPI QR Code, Card, Cash on Delivery).
-- **🎉 Celebratory Order Success & 5-Stage Tracker**: Confetti animation, generated Order ID, 5-stage visual tracking stepper (*Placed → Confirmed → Shipped → Out for Delivery → Delivered*), route map simulation, and assigned courier card.
-- **📋 Orders Management**: Filter tabs by status, farmer status advancement controls, and downloadable invoice receipt.
-- **💰 Financials & Earnings**: Revenue metrics, interactive weekly sales bar chart, transaction log, and instant Payout Withdrawal modal to UPI/Bank.
-- **📈 APMC Mandi Market Intelligence**: Real-time wholesale commodity price trends with `%` change indicators, state comparison, and agricultural advisory tips.
-- **💬 Real-Time Farmer-Buyer Chat**: Product contextual header, quick reply chips, and automated instant replies from the counterpart.
-- **👤 Profile, Multilingual & Support**: Profile management, 6-language switcher (English, हिन्दी, मराठी, తెలుగు, தமிழ், ਪੰਜਾਬੀ), and Kisan Toll-Free Hotline (`1800-180-1551`).
+```
+openhack/
+├── frontend/                     # Modern Web & Mobile Client Application
+│   ├── index.html                # Main UI Entry Point (Tailwind CSS, Lucide Icons)
+│   ├── css/
+│   │   └── styles.css            # Agricultural Design Tokens, Animations, Glassmorphism
+│   ├── js/
+│   │   ├── api.js                # REST API Client (Connects to backend on :5000 with fallback)
+│   │   ├── app.js                # Core App View Router & State Coordinator
+│   │   ├── data.js               # Initial agricultural mock datasets
+│   │   ├── storage.js            # State persistence engine
+│   │   ├── translations.js       # 6-language dictionary (EN, हिन्दी, मराठी, తెలుగు, தமிழ், ਪੰਜਾਬੀ)
+│   │   └── components/           # 20 Modular UI Components
+│   │       ├── FarmerDashboard.js
+│   │       ├── Marketplace.js
+│   │       ├── ProductCard.js
+│   │       ├── ProductDetailModal.js
+│   │       ├── AddProductModal.js
+│   │       ├── MyProducts.js
+│   │       ├── CartDrawer.js
+│   │       ├── CheckoutModal.js
+│   │       ├── OrderSuccessModal.js
+│   │       ├── OrdersManager.js
+│   │       ├── OrderTrackerModal.js
+│   │       ├── EarningsView.js
+│   │       ├── MandiPricesView.js
+│   │       ├── ChatDrawer.js
+│   │       ├── ProfileView.js
+│   │       ├── NotificationsModal.js
+│   │       ├── AuthModal.js
+│   │       ├── Navbar.js
+│   │       ├── BottomNav.js
+│   │       └── Toast.js
+│   └── README.md
+│
+├── backend/                      # Python REST API Server & SQLite Persistence
+│   ├── server.py                 # RESTful HTTP API Server (Port 5000, full CORS)
+│   ├── db.py                     # SQLite Database Engine & Seed Data Generator
+│   ├── farmconnect.db            # SQLite Database File
+│   ├── requirements.txt          # Python requirements
+│   └── README.md                 # Backend API documentation
+│
+├── start_all.bat                 # One-click Windows launcher for Frontend + Backend
+└── README.md                     # Main project guide
+```
 
 ---
 
-## 🚀 Running Locally
+## 🚀 How to Run
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/darshank7319-maker/openhack26.git
-   cd openhack26
-   ```
-
-2. Start any local static HTTP server (e.g. Python):
-   ```bash
-   python -m http.server 8080
-   ```
-
-3. Open your browser and navigate to:
-   ```
-   http://localhost:8080
-   ```
+### Option 1: One-Click Launcher (Windows)
+Double-click **`start_all.bat`** in the root directory. It starts:
+- **Backend Server** on `http://localhost:5000`
+- **Frontend Server** on `http://localhost:8080`
 
 ---
 
-## 🛠️ Tech Stack
+### Option 2: Run Separately
 
-- **Frontend**: HTML5, Vanilla JavaScript (ES6+), Modern Component Architecture
-- **Styling**: Tailwind CSS, Custom Agricultural CSS Design System, Glassmorphism
-- **Icons & Effects**: Lucide Icons, Canvas Confetti
-- **State & Storage**: LocalStorage Persistence Engine with Event Dispatching
+#### 1. Start Backend:
+```bash
+cd backend
+python server.py
+```
+> Running at **`http://localhost:5000`**
+
+#### 2. Start Frontend:
+```bash
+cd frontend
+python -m http.server 8080
+```
+> Open **`http://localhost:8080`** in your browser.
+
+---
+
+## 🌟 Implemented Features
+
+1. **🔐 Authentication & Role Switcher**: Farmer and Buyer accounts + instant demo logins (`farmer@farmconnect.com` / `farmer123`, `buyer@farmconnect.com` / `buyer123`).
+2. **🌾 Farmer Dashboard**: 4 KPI stat cards, Mandi ticker, quick action tools, and recent incoming orders.
+3. **➕ Add Product**: 12 produce photo presets, multi-unit selector (`kg`, `quintal`, `crate`, `ton`, `dozen`, `liter`), organic certification tags, and instant publishing.
+4. **🛒 Marketplace**: Live search, category filters, organic-only filter, price/rating sorting, and Add to Cart / Buy Now.
+5. **🔍 Crop Details**: High-res produce view, freshness meter, quantity selector, and direct *Chat with Farmer*.
+6. **🛍️ Cart & Coupons**: Persistent cart, free delivery over ₹500, and promo coupons (`KISANFIRST`, `FRESH10`, `ORGANIC50`).
+7. **💳 Multi-Method Checkout**: GPS auto-fill, Express 24h vs Standard slot, UPI QR Code, Card, and Cash on Delivery.
+8. **🎉 Order Success & 5-Stage Tracking**: Confetti celebration, generated Order ID, visual milestone stepper (*Placed → Confirmed → Shipped → Out for Delivery → Delivered*), route map simulation, and assigned courier details.
+9. **📋 Orders Management**: Status filter tabs, farmer status advancement controls, and downloadable invoice receipt.
+10. **💰 Earnings & Analytics**: Revenue metrics, interactive weekly sales chart, transaction log, and instant Payout Withdrawal modal to UPI/Bank.
+11. **📈 APMC Mandi Market Intelligence**: Real-time wholesale commodity price trends with `%` change indicators and advisory tips.
+12. **💬 Direct Farmer-Buyer Chat**: Real-time chat with product context, quick suggestions, and automated counterpart replies.
+13. **👤 Profile, Multilingual & Support**: Profile editor, 6-language switcher (English, हिन्दी, मराठी, తెలుగు, தமிழ், ਪੰਜਾਬੀ), and Kisan Toll-Free Helpline (`1800-180-1551`).
