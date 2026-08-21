@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FarmConnect – Direct Market Access for Farmers</title>
+  <meta name="description" content="A modern, farmer-friendly agricultural marketplace connecting farmers directly with buyers to eliminate middlemen and ensure fair market prices." />
+
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              950: '#052e16',
+            },
+            earth: {
+              50: '#fefce8',
+              100: '#fef9c3',
+              200: '#fef08a',
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+              700: '#a16207',
+              800: '#854d0e',
+              900: '#713f12',
+            },
+            harvest: {
+              amber: '#d97706',
+              wheat: '#f59e0b',
+              soil: '#78350f',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            heading: ['Outfit', 'sans-serif'],
+          },
+          boxShadow: {
+            'farm': '0 10px 25px -5px rgba(22, 163, 74, 0.12), 0 8px 10px -6px rgba(22, 163, 74, 0.08)',
+            'farm-lg': '0 20px 35px -10px rgba(22, 163, 74, 0.2), 0 10px 15px -5px rgba(22, 163, 74, 0.1)',
+            'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Canvas Confetti for celebrations -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-gradient-to-br from-emerald-50/70 via-stone-50 to-green-50/50 text-slate-800 antialiased min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
+  
+  <!-- Main App Mount Point -->
+  <div id="root" class="flex-1 flex flex-col min-h-screen"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/components/Toast.js"></script>
+  <script src="js/components/Navbar.js"></script>
+  <script src="js/components/BottomNav.js"></script>
+  <script src="js/components/AuthModal.js"></script>
+  <script src="js/components/FarmerDashboard.js"></script>
+  <script src="js/components/Marketplace.js"></script>
+  <script src="js/components/ProductCard.js"></script>
+  <script src="js/components/ProductDetailModal.js"></script>
+  <script src="js/components/AddProductModal.js"></script>
+  <script src="js/components/MyProducts.js"></script>
+  <script src="js/components/CartDrawer.js"></script>
+  <script src="js/components/CheckoutModal.js"></script>
+  <script src="js/components/OrderSuccessModal.js"></script>
+  <script src="js/components/OrdersManager.js"></script>
+  <script src="js/components/OrderTrackerModal.js"></script>
+  <script src="js/components/EarningsView.js"></script>
+  <script src="js/components/MandiPricesView.js"></script>
+  <script src="js/components/ChatDrawer.js"></script>
+  <script src="js/components/ProfileView.js"></script>
+  <script src="js/components/NotificationsModal.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
