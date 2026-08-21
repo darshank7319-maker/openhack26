@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # FarmConnect – Direct Market Access for Farmers 🌾
 
 > **FarmConnect** is a practical agricultural marketplace system connecting farmers directly with buyers to eliminate middlemen, provide fair prices, and deliver real-time APMC Mandi market intelligence.
@@ -96,3 +97,7 @@ python -m http.server 8080
 11. **📈 APMC Mandi Market Intelligence**: Real-time wholesale commodity price trends with `%` change indicators and advisory tips.
 12. **💬 Direct Farmer-Buyer Chat**: Real-time chat with product context, quick suggestions, and automated counterpart replies.
 13. **👤 Profile, Multilingual & Support**: Profile editor, 6-language switcher (English, हिन्दी, मराठी, తెలుగు, தமிழ், ਪੰਜਾਬੀ), and Kisan Toll-Free Helpline (`1800-180-1551`).
+=======
+# openhack26
+FarmConnect is a mobile app that connects farmers directly with customers and buyers to sell their agricultural products. It helps farmers get better prices, reach more markets, and manage products, orders, and payments easily.
+>>>>>>> 5cf6ca294662c25638cca767ebbec6ce62d174e1
