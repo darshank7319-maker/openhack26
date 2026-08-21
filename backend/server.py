@@ -1,6 +1,6 @@
 """
-FarmConnect Backend - REST API Server
-Runs on port 5000 with complete CORS and JSON endpoints.
+FarmConnect Backend - Complete REST API Server
+Runs on port 5000 with complete CORS, SQLite persistence, and comprehensive REST endpoints.
 """
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -8,6 +8,7 @@ import json
 import urllib.parse
 import os
 import sys
+import time
 
 # Add parent path
 sys.path.insert(0, os.path.dirname(__file__))
@@ -40,23 +41,64 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
         cursor = conn.cursor()
 
         try:
-            # Health check
+            # Health check & API Overview
             if path == "/" or path == "/api/health":
                 self._send_json({
                     "status": "online",
-                    "service": "FarmConnect Direct Marketplace API",
+                    "service": "FarmConnect Direct Marketplace REST API",
                     "version": "2.0.0",
+                    "port": PORT,
+                    "database": "SQLite (farmconnect.db)",
                     "endpoints": [
-                        "/api/products", "/api/orders", "/api/mandi-prices",
-                        "/api/conversations", "/api/notifications", "/api/earnings", "/api/users"
+                        "GET  /api/health",
+                        "GET  /api/products",
+                        "GET  /api/products/<id>",
+                        "POST /api/products",
+                        "DELETE /api/products/<id>",
+                        "GET  /api/orders",
+                        "GET  /api/orders/<id>",
+                        "POST /api/orders",
+                        "PUT  /api/orders/<id>/status",
+                        "GET  /api/mandi-prices",
+                        "GET  /api/conversations",
+                        "POST /api/messages",
+                        "GET  /api/notifications",
+                        "PUT  /api/notifications/read-all",
+                        "GET  /api/earnings",
+                        "POST /api/payouts",
+                        "GET  /api/users",
+                        "POST /api/auth/login",
+                        "POST /api/auth/register",
+                        "PUT  /api/users/profile",
+                        "POST /api/reset"
                     ]
                 })
+
+            # Single Product by ID
+            elif path.startswith("/api/products/"):
+                prod_id = path.split("/")[3]
+                cursor.execute("SELECT * FROM products WHERE id = ?", (prod_id,))
+                row = cursor.fetchone()
+                if row:
+                    p = dict(row)
+                    p["isOrganic"] = bool(p.get("is_organic"))
+                    p["availableQty"] = p.get("available_qty")
+                    p["minOrderQty"] = p.get("min_order_qty")
+                    p["harvestDate"] = p.get("harvest_date")
+                    p["farmerId"] = p.get("farmer_id")
+                    p["farmerName"] = p.get("farmer_name")
+                    p["farmName"] = p.get("farm_name")
+                    p["reviewsCount"] = p.get("reviews_count")
+                    p["bulkDiscount"] = p.get("bulk_discount")
+                    p["shelfLifeDays"] = p.get("shelf_life_days")
+                    self._send_json({"product": p})
+                else:
+                    self._send_json({"error": "Product not found"}, 404)
 
             # Products list
             elif path == "/api/products":
                 cursor.execute("SELECT * FROM products ORDER BY created_at DESC")
                 rows = [dict(row) for row in cursor.fetchall()]
-                # Convert boolean / number types
                 for r in rows:
                     r["isOrganic"] = bool(r.get("is_organic"))
                     r["availableQty"] = r.get("available_qty")
@@ -68,7 +110,34 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                     r["reviewsCount"] = r.get("reviews_count")
                     r["bulkDiscount"] = r.get("bulk_discount")
                     r["shelfLifeDays"] = r.get("shelf_life_days")
-                self._send_json({"products": rows})
+                self._send_json({"products": rows, "count": len(rows)})
+
+            # Single Order by ID
+            elif path.startswith("/api/orders/"):
+                order_id = path.split("/")[3]
+                cursor.execute("SELECT * FROM orders WHERE id = ?", (order_id,))
+                row = cursor.fetchone()
+                if row:
+                    item = dict(row)
+                    item["items"] = json.loads(item.get("items_json") or "[]")
+                    item["trackingTimeline"] = json.loads(item.get("tracking_timeline_json") or "[]")
+                    item["deliveryPartner"] = json.loads(item.get("delivery_partner_json") or "{}")
+                    item["itemTotal"] = item.get("item_total")
+                    item["deliveryFee"] = item.get("delivery_fee")
+                    item["buyerId"] = item.get("buyer_id")
+                    item["buyerName"] = item.get("buyer_name")
+                    item["buyerPhone"] = item.get("buyer_phone")
+                    item["deliveryAddress"] = item.get("delivery_address")
+                    item["farmerId"] = item.get("farmer_id")
+                    item["farmerName"] = item.get("farmer_name")
+                    item["farmName"] = item.get("farm_name")
+                    item["farmerPhone"] = item.get("farmer_phone")
+                    item["paymentMethod"] = item.get("payment_method")
+                    item["paymentStatus"] = item.get("payment_status")
+                    item["expectedDelivery"] = item.get("expected_delivery")
+                    self._send_json({"order": item})
+                else:
+                    self._send_json({"error": "Order not found"}, 404)
 
             # Orders list
             elif path == "/api/orders":
@@ -93,7 +162,7 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                     item["paymentStatus"] = item.get("payment_status")
                     item["expectedDelivery"] = item.get("expected_delivery")
                     rows.append(item)
-                self._send_json({"orders": rows})
+                self._send_json({"orders": rows, "count": len(rows)})
 
             # Mandi Prices
             elif path == "/api/mandi-prices":
@@ -110,7 +179,7 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                     item["marketDemand"] = item.get("market_demand")
                     item["advisoryTip"] = item.get("advisory_tip")
                     rows.append(item)
-                self._send_json({"mandiPrices": rows})
+                self._send_json({"mandiPrices": rows, "count": len(rows)})
 
             # Conversations & Chat
             elif path == "/api/conversations":
@@ -141,12 +210,13 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                     item = dict(row)
                     item["isRead"] = bool(item.get("is_read"))
                     rows.append(item)
-                self._send_json({"notifications": rows})
+                self._send_json({"notifications": rows, "unreadCount": len([n for n in rows if not n["isRead"]])})
 
             # Earnings and Payouts
             elif path == "/api/earnings":
                 cursor.execute("SELECT * FROM payouts ORDER BY created_at DESC")
                 payouts = [dict(r) for r in cursor.fetchall()]
+                total_payouts = sum(p["amount"] for p in payouts)
                 self._send_json({
                     "payouts": payouts,
                     "metrics": {
@@ -154,7 +224,7 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                         "weeklyEarnings": 14850,
                         "monthlyEarnings": 58200,
                         "totalLifetimeEarnings": 142600,
-                        "availableBalance": 18450,
+                        "availableBalance": max(0, 18450 - (total_payouts - 11000)),
                         "pendingEscrow": 3850
                     }
                 })
@@ -176,7 +246,7 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                 self._send_json({"users": rows})
 
             else:
-                self._send_json({"error": "Not Found", "path": path}, 404)
+                self._send_json({"error": "Endpoint Not Found", "path": path}, 404)
 
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
@@ -197,8 +267,45 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
         cursor = conn.cursor()
 
         try:
+            # Login
+            if path == "/api/auth/login":
+                email = payload.get("email", "").strip().lower()
+                role = payload.get("role", "farmer")
+                cursor.execute("SELECT * FROM users WHERE LOWER(email) = ? OR role = ?", (email, role))
+                row = cursor.fetchone()
+                if row:
+                    u = dict(row)
+                    u["bankDetails"] = json.loads(u.get("bank_details") or "{}")
+                    u["deliveryAddress"] = json.loads(u.get("delivery_address") or "{}")
+                    self._send_json({"success": True, "user": u, "token": "fc_token_" + str(int(time.time()))})
+                else:
+                    self._send_json({"error": "User not found"}, 404)
+
+            # Register
+            elif path == "/api/auth/register":
+                user_id = "usr_" + str(int(time.time()))
+                role = payload.get("role", "farmer")
+                name = payload.get("name", "Farmer")
+                email = payload.get("email", "")
+                phone = payload.get("phone", "")
+                location = payload.get("location", "India")
+                farm_name = payload.get("farmName", f"{name}'s Farm")
+                avatar = payload.get("avatar", "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80")
+
+                cursor.execute("""
+                    INSERT INTO users 
+                    (id, role, name, email, phone, avatar, farm_name, location, rating, total_ratings, is_verified, kisan_card, experience_years, total_crops_sold, bio, bank_details, delivery_address)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """, (
+                    user_id, role, name, email, phone, avatar, farm_name, location, 5.0, 1, 1, "MH-NEW-2026", 1, "0 Q",
+                    "Direct registered user on FarmConnect.", json.dumps({"upiId": f"{name.lower().replace(' ', '')}@upi"}),
+                    json.dumps({"fullName": name, "phone": phone, "city": location, "street": location})
+                ))
+                conn.commit()
+                self._send_json({"success": True, "user": {"id": user_id, "name": name, "email": email, "role": role}}, 201)
+
             # Create Product
-            if path == "/api/products":
+            elif path == "/api/products":
                 prod_id = payload.get("id") or ("prod_" + str(int(time.time() * 1000)))
                 cursor.execute("""
                     INSERT INTO products 
@@ -215,7 +322,7 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                     payload.get("description"), payload.get("shelfLifeDays", 10), payload.get("bulkDiscount", "5% off")
                 ))
 
-                # Also insert notification
+                # Insert notification
                 cursor.execute("""
                     INSERT INTO notifications (id, type, title, message, time, is_read, target)
                     VALUES (?,?,?,?,?,?,?)
@@ -266,7 +373,7 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                 conv_id = payload.get("conversationId", "conv_01")
                 sender = payload.get("sender", "buyer")
                 text = payload.get("text", "")
-                now_time = "10:30 AM"
+                now_time = time.strftime("%I:%M %p")
 
                 cursor.execute("SELECT messages_json FROM conversations WHERE id = ?", (conv_id,))
                 row = cursor.fetchone()
@@ -295,7 +402,7 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                 cursor.execute("""
                     INSERT INTO payouts (id, amount, date, status, upi, ref)
                     VALUES (?,?,?,?,?,?)
-                """, (payout_id, amount, "2026-08-21", "Completed", upi, ref))
+                """, (payout_id, amount, time.strftime("%Y-%m-%d"), "Completed", upi, ref))
 
                 cursor.execute("""
                     INSERT INTO notifications (id, type, title, message, time, is_read, target)
@@ -369,6 +476,17 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
                 else:
                     self._send_json({"error": "Order not found"}, 404)
 
+            # Update user profile: /api/users/profile
+            elif path == "/api/users/profile":
+                user_id = payload.get("id", "usr_farmer_01")
+                cursor.execute("""
+                    UPDATE users 
+                    SET name = ?, phone = ?, location = ?, bio = ?
+                    WHERE id = ?
+                """, (payload.get("name"), payload.get("phone"), payload.get("location"), payload.get("bio"), user_id))
+                conn.commit()
+                self._send_json({"success": True, "message": "Profile updated"})
+
             # Mark all notifications read
             elif path == "/api/notifications/read-all":
                 cursor.execute("UPDATE notifications SET is_read = 1")
@@ -378,6 +496,26 @@ class FarmConnectAPIHandler(BaseHTTPRequestHandler):
             else:
                 self._send_json({"error": "Unknown PUT endpoint"}, 404)
 
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+        finally:
+            conn.close()
+
+    def do_DELETE(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        conn = Database.get_connection()
+        cursor = conn.cursor()
+
+        try:
+            # Delete Product: /api/products/<id>
+            if path.startswith("/api/products/"):
+                prod_id = path.split("/")[3]
+                cursor.execute("DELETE FROM products WHERE id = ?", (prod_id,))
+                conn.commit()
+                self._send_json({"success": True, "deletedId": prod_id})
+            else:
+                self._send_json({"error": "Unknown DELETE endpoint"}, 404)
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
         finally:
